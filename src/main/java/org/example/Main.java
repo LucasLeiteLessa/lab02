@@ -7,15 +7,34 @@ public class Main {
         double[] valores = {50.0, 150.0, 30.0};
         int[] quantidades = {2, 1, 3};
 
-        ProcessadorDeVendas p = new ProcessadorDeVendas(
-                "João Silva",
-                "12345678901",
-                false,
-                "Rua das Flores, 123 - SP",
+        Cliente clienteVip = new Cliente(
+                "João Silva", "12345678901", "Rua das Flores, 123 - SP");
+        ProcessadorDeVendas vendaVip = new ProcessadorDeVendas(
+                clienteVip,
                 valores,
-                quantidades
+                quantidades,
+                new FreteVipStrategy()
         );
+        vendaVip.processar();
 
-        p.processar();
+        Cliente clienteSudeste = new Cliente(
+                "Maria Souza", "98765432100", "Avenida Brasil, 456 - RJ");
+        ProcessadorDeVendas vendaSudeste = new ProcessadorDeVendas(
+                clienteSudeste,
+                valores,
+                quantidades,
+                new FreteSudesteStrategy()
+        );
+        vendaSudeste.processar();
+
+        Cliente clienteNacional = new Cliente(
+                "Carlos Lima", "45678912300", "Rua Central, 789 - BA");
+        ProcessadorDeVendas vendaNacional = new ProcessadorDeVendas(
+                clienteNacional,
+                valores,
+                quantidades,
+                new FreteNacionalStrategy()
+        );
+        vendaNacional.processar();
     }
 }

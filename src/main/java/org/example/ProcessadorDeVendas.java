@@ -8,29 +8,21 @@ public class ProcessadorDeVendas {
     private static final double LIMITE_IMPOSTO_MAIOR = 100.0;
     private static final double TAXA_IMPOSTO_MAIOR = 0.15;
     private static final double TAXA_IMPOSTO_MENOR = 0.05;
-    private static final double FRETE_ESTADOS_PROXIMOS = 15.0;
-    private static final double FRETE_OUTROS_ESTADOS = 50.0;
 
-    private final String nomeCliente;
-    private final String documento;
-    private final boolean clienteVip;
-    private final String endereco;
+    private final Cliente cliente;
     private final double[] precos;
     private final int[] quantidades;
+    private final EstrategiaFrete estrategiaFrete;
 
     public ProcessadorDeVendas(
-            String nomeCliente,
-            String documento,
-            boolean clienteVip,
-            String endereco,
+            Cliente cliente,
             double[] precos,
-            int[] quantidades) {
-        this.nomeCliente = nomeCliente;
-        this.documento = documento;
-        this.clienteVip = clienteVip;
-        this.endereco = endereco;
+            int[] quantidades,
+            EstrategiaFrete estrategiaFrete) {
+        this.cliente = cliente;
         this.precos = precos;
         this.quantidades = quantidades;
+        this.estrategiaFrete = estrategiaFrete;
     }
 
     public void processar() {
@@ -40,17 +32,19 @@ public class ProcessadorDeVendas {
 
         double subtotal = calcularSubtotal();
         double totalImpostos = calcularImpostos();
-        double frete = calcularFrete();
+        double frete = estrategiaFrete.calcularFrete(cliente);
         double totalFinal = subtotal + totalImpostos + frete;
 
         imprimirRecibo(subtotal, totalImpostos, frete, totalFinal);
     }
 
     private void validarVenda() {
-        if (documento == null || documento.length() != TAMANHO_DOCUMENTO) {
+        if (cliente == null || cliente.getDocumento() == null
+                || cliente.getDocumento().length() != TAMANHO_DOCUMENTO) {
             throw new IllegalArgumentException("Documento invalido.");
         }
-        if (endereco == null || precos == null || quantidades == null) {
+        if (cliente.getEndereco() == null || precos == null || quantidades == null
+                || estrategiaFrete == null) {
             throw new IllegalArgumentException("Dados da venda incompletos.");
         }
         if (precos.length != quantidades.length) {
@@ -78,19 +72,6 @@ public class ProcessadorDeVendas {
         return totalImpostos;
     }
 
-    private double calcularFrete() {
-        if (clienteVip) {
-            return 0;
-        }
-        return possuiFreteReduzido() ? FRETE_ESTADOS_PROXIMOS : FRETE_OUTROS_ESTADOS;
-    }
-
-    private boolean possuiFreteReduzido() {
-        return endereco.contains("SP")
-                || endereco.contains("RJ")
-                || endereco.contains("MG");
-    }
-
     private void imprimirRecibo(
             double subtotal,
             double totalImpostos,
@@ -100,8 +81,8 @@ public class ProcessadorDeVendas {
         System.out.println("RECIBO DE VENDA");
         System.out.println("=====================================");
         System.out.println("Data: " + new Date());
-        System.out.println("Cliente: " + nomeCliente);
-        System.out.println("Documento: " + documento);
+        System.out.println("Cliente: " + cliente.getNome());
+        System.out.println("Documento: " + cliente.getDocumento());
         System.out.println("-------------------------------------");
         System.out.println("Subtotal Itens: R$ " + subtotal);
         System.out.println("Total Impostos: R$ " + totalImpostos);
